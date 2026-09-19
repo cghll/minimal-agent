@@ -15,7 +15,7 @@ class SearchItem:
 
 class SearchTool:
     name = "search"
-    description = "Search a deterministic local knowledge index."
+    description = "搜索确定性的本地知识索引。"
     parameters: JsonObject = {
         "type": "object",
         "properties": {"query": {"type": "string"}},

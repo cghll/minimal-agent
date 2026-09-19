@@ -28,7 +28,7 @@ _UNARY_OPERATORS: dict[type[ast.unaryop], UnaryOperator] = {
 
 class CalculatorTool:
     name = "calculator"
-    description = "Evaluate a basic arithmetic expression safely."
+    description = "安全地计算基本算术表达式。"
     parameters: JsonObject = {
         "type": "object",
         "properties": {"expression": {"type": "string"}},

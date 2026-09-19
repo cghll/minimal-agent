@@ -6,7 +6,7 @@ from minimal_agent.tools.base import ToolContext
 
 class TaskListTool:
     name = "task_list"
-    description = "Add, list, or complete tasks in the current conversation session."
+    description = "在当前会话中添加、列出或完成待办事项。"
     parameters: JsonObject = {
         "type": "object",
         "properties": {

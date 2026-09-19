@@ -89,7 +89,7 @@ def test_trace_stores_tool_outcomes_and_safe_decision_summary(tmp_path: Path) ->
 
     trace = recorder.get_trace(run_id)
 
-    assert trace["steps"][0]["reasoning_summary"] == "model requested tool calls"
+    assert trace["steps"][0]["reasoning_summary"] == "模型请求调用工具"
     assert trace["steps"][0]["tool_results"][0]["ok"] is False
     assert trace["steps"][0]["error_code"] == "tool_validation_error"
 

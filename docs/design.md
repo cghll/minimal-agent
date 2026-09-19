@@ -22,26 +22,26 @@
 ## 核心时序
 
 ```text
-Client -> API: user_id, session_id, content
-API -> Repository: verify ownership
+  Client -> API: user_id, session_id, content
+API -> Repository: 校验所有权
 API -> Runtime: run(...)
-Runtime -> Repository: append user message
+Runtime -> Repository: 追加用户消息
 loop 1..MAX_AGENT_STEPS
-  Runtime -> ContextBuilder: build session context
-  ContextBuilder -> Repository: summary + unsummarized messages
-  Runtime -> LLM: messages
-  LLM -> Runtime: decision JSON text
-  Runtime -> DecisionParser: strict parse
+  Runtime -> ContextBuilder: 组装会话上下文
+  ContextBuilder -> Repository: 摘要 + 未压缩消息
+  Runtime -> LLM: 消息
+  LLM -> Runtime: 决策 JSON 文本
+  Runtime -> DecisionParser: 严格解析
   alt final_answer
-    Runtime -> Repository: append assistant message
-    Runtime -> Trace: finish completed
+    Runtime -> Repository: 追加助手消息
+    Runtime -> Trace: 完成并记录 completed
     Runtime -> API: RunResult
   else tool_calls
-    Runtime -> Registry: validate and execute
-    Runtime -> Repository: append structured tool result
-    Runtime -> loop: continue
+    Runtime -> Registry: 校验并执行
+    Runtime -> Repository: 追加结构化工具结果
+    Runtime -> loop: 继续
 end
-Runtime -> Trace: finish failed(max_steps_exceeded)
+Runtime -> Trace: 失败并记录 max_steps_exceeded
 ```
 
 ## 决策协议

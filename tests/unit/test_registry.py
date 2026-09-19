@@ -24,7 +24,7 @@ def test_catalog_exposes_name_description_and_schema() -> None:
     assert registry.catalog() == [
         {
             "name": "calculator",
-            "description": "Evaluate a basic arithmetic expression safely.",
+            "description": "安全地计算基本算术表达式。",
             "parameters": {
                 "type": "object",
                 "properties": {"expression": {"type": "string"}},

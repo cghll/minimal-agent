@@ -1,4 +1,4 @@
-# Minimal Agent Runtime
+# 最小 Agent 运行时
 
 一个不依赖 LangGraph、OpenHands、OpenClaw、PI 等 Agent 框架的最小可用 Agent。项目自行实现循环控制、结构化决策解析、工具注册与调度、多会话 memory、上下文压缩、错误恢复和 trace。
 
@@ -135,7 +135,7 @@ curl "http://127.0.0.1:8000/v1/runs/<run_id>?user_id=user-a"
 ```python
 class MyTool:
     name = "my_tool"
-    description = "Describe when the model should use this tool."
+    description = "说明模型应在何时调用此工具。"
     parameters = {
         "type": "object",
         "properties": {"value": {"type": "string"}},

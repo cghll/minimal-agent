@@ -51,14 +51,14 @@ def create_app(
         if llm_client is not None:
             await llm_client.close()
 
-    app = FastAPI(title="Minimal Agent Runtime", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="最小 Agent 运行时", version="0.1.0", lifespan=lifespan)
 
     @app.exception_handler(SessionNotFoundError)
     async def session_not_found_handler(
         request: Request, exc: SessionNotFoundError
     ) -> JSONResponse:
         del request
-        return _error_response(404, exc.code, "Session not found")
+        return _error_response(404, exc.code, "会话不存在")
 
     @app.exception_handler(MaxStepsExceeded)
     async def max_steps_handler(request: Request, exc: MaxStepsExceeded) -> JSONResponse:
@@ -68,7 +68,7 @@ def create_app(
     @app.exception_handler(LLMUnavailable)
     async def llm_unavailable_handler(request: Request, exc: LLMUnavailable) -> JSONResponse:
         del request
-        return _error_response(503, exc.code, "LLM service unavailable")
+        return _error_response(503, exc.code, "LLM 服务不可用")
 
     @app.exception_handler(AgentError)
     async def agent_error_handler(request: Request, exc: AgentError) -> JSONResponse:
@@ -123,9 +123,9 @@ def create_app(
         try:
             result = trace.get_trace(run_id)
         except KeyError as exc:
-            raise HTTPException(status_code=404, detail="Run not found") from exc
+            raise HTTPException(status_code=404, detail="运行记录不存在") from exc
         if result["user_id"] != user_id:
-            raise HTTPException(status_code=404, detail="Run not found")
+            raise HTTPException(status_code=404, detail="运行记录不存在")
         return result
 
     return app

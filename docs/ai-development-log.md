@@ -26,15 +26,15 @@
 
 执行方式为 inline execution：逐任务写失败测试、观察 RED、补最小实现、观察 GREEN，然后运行全量质量门禁。
 
-## Agent System Prompt
+## Agent 系统提示
 
 运行时使用的完整 Prompt 位于 `prompts/agent_system.md`。核心约束是：
 
 ```text
-Return exactly one JSON object and no prose.
-Choose tool_calls when a registered tool is needed, otherwise return final_answer.
-Only call tools listed in the tool catalog and match their JSON Schemas.
-Do not reveal hidden chain-of-thought; reasoning_summary is one brief auditable sentence.
+只返回一个 JSON 对象，不要输出任何说明文字。
+需要已注册工具时选择 tool_calls，否则返回 final_answer。
+只能调用工具目录中列出的工具，并匹配对应的 JSON Schema。
+不要透露隐藏思维链；reasoning_summary 只能是一句简短、可审计的说明。
 ```
 
 完整 Prompt 独立保存，便于评审和版本管理，不在 Python 源码中重复维护。

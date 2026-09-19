@@ -63,7 +63,7 @@ async def test_context_orders_protocol_catalog_summary_and_history(
     assert messages[0] == {"role": "system", "content": "protocol"}
     assert messages[1]["role"] == "system"
     assert "calculator" in str(messages[1]["content"])
-    assert messages[2] == {"role": "system", "content": "Conversation summary:\nold summary"}
+    assert messages[2] == {"role": "system", "content": "会话摘要：\nold summary"}
     assert messages[-1] == {"role": "user", "content": "latest question"}
 
 
@@ -109,7 +109,7 @@ async def test_summary_failure_uses_deterministic_fallback(
     messages = await builder.build("u1", "s1")
 
     summary = repository.get_session("u1", "s1").summary
-    assert summary.startswith("Fallback summary:")
+    assert summary.startswith("降级摘要：")
     assert "fact-0" in summary
     assert "fact-11" in str(messages)
 

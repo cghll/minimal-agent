@@ -121,8 +121,8 @@ class AgentRuntime:
                 {
                     "role": "system",
                     "content": (
-                        f"Your previous output was invalid: {exc}. "
-                        "Return one valid JSON object matching the required decision shape."
+                        f"你上一次的输出无效：{exc}。"
+                        "请返回一个符合要求决策格式的有效 JSON 对象。"
                     ),
                 },
             ]

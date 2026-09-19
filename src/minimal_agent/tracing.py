@@ -165,7 +165,7 @@ def _deserialize_step(row: sqlite3.Row) -> dict[str, Any]:
 
 def _decision_label(decision: AgentDecision) -> str:
     return (
-        "model requested tool calls"
+        "模型请求调用工具"
         if decision.kind == "tool_calls"
-        else "model returned final answer"
+        else "模型返回最终答案"
     )

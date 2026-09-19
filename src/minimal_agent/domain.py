@@ -36,7 +36,7 @@ class MaxStepsExceeded(AgentError):
     def __init__(self, run_id: str, limit: int) -> None:
         self.run_id = run_id
         self.limit = limit
-        super().__init__(f"Agent exceeded the maximum of {limit} steps")
+        super().__init__(f"Agent 已超过最大步数 {limit}")
 
 
 class LLMUnavailable(AgentError):

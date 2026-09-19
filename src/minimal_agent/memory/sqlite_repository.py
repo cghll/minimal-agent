@@ -72,7 +72,7 @@ class SQLiteRepository:
                 "SELECT user_id FROM sessions WHERE session_id = ?", (session_id,)
             ).fetchone()
             if row is not None and row["user_id"] != user_id:
-                raise SessionNotFoundError(f"Session not found: {session_id}")
+                raise SessionNotFoundError(f"会话不存在：{session_id}")
             connection.execute(
                 "INSERT OR IGNORE INTO sessions(user_id, session_id) VALUES (?, ?)",
                 (user_id, session_id),
@@ -87,7 +87,7 @@ class SQLiteRepository:
                 (user_id, session_id),
             ).fetchone()
         if row is None:
-            raise SessionNotFoundError(f"Session not found: {session_id}")
+            raise SessionNotFoundError(f"会话不存在：{session_id}")
         return SessionState(**dict(row))
 
     def append_message(self, user_id: str, session_id: str, message: Message) -> int:
