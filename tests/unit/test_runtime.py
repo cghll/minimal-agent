@@ -42,6 +42,11 @@ class RecordingTrace:
     def finish_run(self, run_id: str, status: str, error_code: str | None = None) -> None:
         self.status = status
 
+    def record_tool_result(
+        self, run_id: str, step_number: int, call_id: str, result: dict[str, object]
+    ) -> None:
+        del run_id, step_number, call_id, result
+
 
 def tool_decision(name: str, arguments: dict[str, object], call_id: str = "c1") -> str:
     return json.dumps(

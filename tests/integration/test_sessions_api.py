@@ -166,3 +166,15 @@ async def test_message_validation_rejects_empty_content(tmp_path: Path) -> None:
         )
 
     assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_session_id_validation_rejects_oversized_path(tmp_path: Path) -> None:
+    transport = httpx.ASGITransport(app=build_app(tmp_path))
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            f"/v1/sessions/{'x' * 129}/messages",
+            json={"user_id": "u1", "content": "hello"},
+        )
+
+    assert response.status_code == 422

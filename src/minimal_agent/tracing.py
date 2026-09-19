@@ -37,6 +37,7 @@ class SQLiteTraceRecorder:
                     decision_kind TEXT NOT NULL,
                     reasoning_summary TEXT NOT NULL,
                     tool_calls_json TEXT NOT NULL,
+                    tool_results_json TEXT NOT NULL DEFAULT '[]',
                     duration_ms INTEGER NOT NULL,
                     error_code TEXT,
                     PRIMARY KEY(run_id, step_number),
@@ -73,16 +74,36 @@ class SQLiteTraceRecorder:
             connection.execute(
                 """INSERT INTO run_steps(
                        run_id, step_number, decision_kind, reasoning_summary,
-                       tool_calls_json, duration_ms
-                   ) VALUES (?, ?, ?, ?, ?, ?)""",
+                       tool_calls_json, tool_results_json, duration_ms
+                   ) VALUES (?, ?, ?, ?, ?, '[]', ?)""",
                 (
                     run_id,
                     step_number,
                     decision.kind,
-                    decision.reasoning_summary,
+                    _decision_label(decision),
                     json.dumps(calls, ensure_ascii=False),
                     duration_ms,
                 ),
+            )
+
+    def record_tool_result(
+        self, run_id: str, step_number: int, call_id: str, result: dict[str, Any]
+    ) -> None:
+        with self._connect() as connection:
+            row = connection.execute(
+                "SELECT tool_results_json FROM run_steps WHERE run_id = ? AND step_number = ?",
+                (run_id, step_number),
+            ).fetchone()
+            if row is None:
+                return
+            results = json.loads(row["tool_results_json"])
+            results.append({"call_id": call_id, **_redact(result)})
+            error = result.get("error")
+            error_code = error.get("code") if isinstance(error, dict) else None
+            connection.execute(
+                """UPDATE run_steps SET tool_results_json = ?, error_code = COALESCE(?, error_code)
+                   WHERE run_id = ? AND step_number = ?""",
+                (json.dumps(results, ensure_ascii=False), error_code, run_id, step_number),
             )
 
     def finish_run(self, run_id: str, status: str, error_code: str | None = None) -> None:
@@ -104,7 +125,7 @@ class SQLiteTraceRecorder:
                 raise KeyError(run_id)
             rows = connection.execute(
                 """SELECT step_number, decision_kind, reasoning_summary,
-                          tool_calls_json, duration_ms, error_code
+                          tool_calls_json, tool_results_json, duration_ms, error_code
                    FROM run_steps WHERE run_id = ? ORDER BY step_number""",
                 (run_id,),
             ).fetchall()
@@ -138,4 +159,13 @@ def _redact(value: Any) -> Any:
 def _deserialize_step(row: sqlite3.Row) -> dict[str, Any]:
     step = dict(row)
     step["tool_calls"] = json.loads(step.pop("tool_calls_json"))
+    step["tool_results"] = json.loads(step.pop("tool_results_json"))
     return step
+
+
+def _decision_label(decision: AgentDecision) -> str:
+    return (
+        "model requested tool calls"
+        if decision.kind == "tool_calls"
+        else "model returned final answer"
+    )

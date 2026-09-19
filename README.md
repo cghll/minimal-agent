@@ -124,7 +124,7 @@ curl "http://127.0.0.1:8000/v1/runs/<run_id>?user_id=user-a"
 4. 尚未压缩的历史消息
 5. 最新用户输入或本轮工具结果
 
-工具执行结果作为标记了工具名和 `call_id` 的 system 文本发送，避免假装成厂商原生 function-calling 消息。简短决策摘要只写 trace，不进入长期对话 memory。
+工具执行结果作为带工具名和 `call_id` 的显式 `UNTRUSTED TOOL DATA` user 消息发送，避免假装成厂商原生 function-calling 消息，也避免把外部数据提升为 system 指令。简短决策摘要只写 trace，不进入长期对话 memory。
 
 候选上下文超过 `CONTEXT_CHAR_BUDGET` 时，保留最近 8 条消息，把更早消息与旧摘要交给独立摘要调用。摘要必须保留目标、事实、完成的工具动作和未完成事项。摘要失败时生成最多 4000 字符的确定性角色列表，主请求继续执行。
 
@@ -198,4 +198,3 @@ docs/                    系统设计与 AI 开发记录
 ```
 
 更详细的设计见 `docs/design.md`，AI Prompt 与开发问题记录见 `docs/ai-development-log.md`。
-

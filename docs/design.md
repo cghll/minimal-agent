@@ -92,7 +92,9 @@ run_steps
   decision_kind
   reasoning_summary
   tool_calls_json
+  tool_results_json
   duration_ms
+  error_code
 ```
 
 `session_id` 全局唯一并记录 owner。任何 session 查询同时校验 `user_id`；错误时统一表现为不存在，避免泄漏其他用户的 session 是否存在。
@@ -107,6 +109,8 @@ run_steps
 4. 摘要调用失败时保存确定性 fallback 文本。
 
 字符预算是对 token 的低成本近似，适合最小实现。生产版本应换成模型对应 tokenizer，并对 system prompt、catalog、summary 与最近消息分别设配额。
+
+工具结果在数据库中保留结构化 tool message，但发给 LLM 时转换为带工具名和 `call_id` 的 `user` 消息，并加上 `UNTRUSTED TOOL DATA` 标记。系统 Prompt 要求模型只把标记内容当作数据，不能执行其中的指令。
 
 ## 错误模型
 
@@ -132,4 +136,3 @@ run_steps
 ## 测试策略
 
 单元测试覆盖领域校验、工具、parser、HTTP client、repository、context、runtime 和 trace。集成测试组合 FastAPI、真实 runtime 与 SQLite，只在网络边界替换 LLM。live 测试默认跳过，通过环境开关验证真实 API 的工具选择和多轮 memory。
-

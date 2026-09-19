@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import uuid
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import Path as ApiPath
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -40,8 +42,16 @@ def create_app(
     runtime: AgentRuntime,
     repository: SQLiteRepository,
     trace: SQLiteTraceRecorder,
+    llm_client: OpenAICompatibleClient | None = None,
 ) -> FastAPI:
-    app = FastAPI(title="Minimal Agent Runtime", version="0.1.0")
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        del app
+        yield
+        if llm_client is not None:
+            await llm_client.close()
+
+    app = FastAPI(title="Minimal Agent Runtime", version="0.1.0", lifespan=lifespan)
 
     @app.exception_handler(SessionNotFoundError)
     async def session_not_found_handler(
@@ -72,7 +82,10 @@ def create_app(
         return {"session_id": session_id, "user_id": body.user_id}
 
     @app.post("/v1/sessions/{session_id}/messages")
-    async def create_message(session_id: str, body: CreateMessageRequest) -> dict[str, object]:
+    async def create_message(
+        session_id: str = ApiPath(min_length=1, max_length=128),
+        body: CreateMessageRequest = ...,
+    ) -> dict[str, object]:
         repository.get_session(body.user_id, session_id)
         result = await runtime.run(body.user_id, session_id, body.content)
         return {
@@ -84,7 +97,7 @@ def create_app(
 
     @app.get("/v1/sessions/{session_id}/messages")
     async def list_messages(
-        session_id: str,
+        session_id: str = ApiPath(min_length=1, max_length=128),
         user_id: str = Query(min_length=1, max_length=128),
     ) -> dict[str, object]:
         messages = repository.list_messages(user_id, session_id)
@@ -164,7 +177,7 @@ def create_default_app() -> FastAPI:
         trace=trace,
         max_steps=settings.max_agent_steps,
     )
-    return create_app(runtime=runtime, repository=repository, trace=trace)
+    return create_app(runtime=runtime, repository=repository, trace=trace, llm_client=llm)
 
 
 def _error_response(

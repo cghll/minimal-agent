@@ -31,6 +31,10 @@ class TraceRecorder(Protocol):
 
     def finish_run(self, run_id: str, status: str, error_code: str | None = None) -> None: ...
 
+    def record_tool_result(
+        self, run_id: str, step_number: int, call_id: str, result: JsonObject
+    ) -> None: ...
+
 
 class AgentRuntime:
     def __init__(
@@ -94,6 +98,7 @@ class AgentRuntime:
                         failure_counts[signature] = failure_counts.get(signature, 0) + 1
                         result = _tool_error("tool_execution_error", type(exc).__name__)
                     self._repository.append_message(user_id, session_id, Message.tool(call, result))
+                    self._trace.record_tool_result(run_id, step_number, call.call_id, result)
                     if failure_counts.get(signature, 0) >= 2:
                         raise ToolError("The same tool call failed twice")
 

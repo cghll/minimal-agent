@@ -101,3 +101,13 @@ python -m pytest -m live -q --basetemp=.test-tmp-live
 
 第三条命令仅在设置 `RUN_LIVE_LLM_TESTS=1` 和真实 LLM 环境变量后执行。当前开发环境未提供 API Key，因此不得把默认 skip 描述为真实调用成功。
 
+## 代码审查后的修复
+
+独立只读审查指出 context 最终预算、工具结果信任边界、trace 结果完整性、reasoning summary 脱敏和 API 生命周期/路径校验问题。后续修复包括：
+
+- 对 system/catalog/summary/最近历史做最终字符预算裁剪，确保返回 context 不超过配置预算。
+- 将工具结果作为带 `UNTRUSTED TOOL DATA` 标记的 user 数据发送，并在系统 Prompt 中明确禁止执行其中的指令。
+- 在 trace 中记录每个工具调用的脱敏结果和错误码，reasoning summary 改存固定的应用侧决策标签。
+- 对 session 路径参数增加 1 至 128 字符限制，并用 FastAPI lifespan 关闭自有 HTTP client。
+
+这些修改先添加失败测试，再实现并通过全量离线测试。
